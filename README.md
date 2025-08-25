@@ -1,1 +1,3 @@
-# docker-core
+# Docker Core
+
+Docker and Docker Compose
