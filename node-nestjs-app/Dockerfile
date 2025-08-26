@@ -24,4 +24,4 @@ EXPOSE 3000
 
 # Ejecutar el servidor (ejecuta el JS compilado)
 # Ejecutar el servidor (ejecuta el JS compilado)
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start"]
