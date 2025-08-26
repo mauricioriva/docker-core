@@ -1,30 +1,21 @@
 FROM alpine:3.20
 
-# Instalar dependencias del sistema + Python
-RUN apk add --no-cache \
-    python3 \
-    py3-pip \
-    curl \
-    bash \
-    gcc \
-    musl-dev \
-    libffi-dev \
-    python3-dev
-
-# Asegurar que "python" apunte a python3
-RUN ln -sf python3 /usr/bin/python
+# Instalar Python y dependencias básicas
+RUN apk add --no-cache python3 py3-pip curl build-base
 
 # Instalar uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && mv /root/.local/bin/uv /usr/local/bin/uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh -s -- --yes \
+ && mv /root/.local/bin/uv /usr/local/bin/uv
 
+# Directorio de la app
 WORKDIR /app
 
-# Copiar dependencias primero (cache)
-COPY pyproject.toml uv.lock* ./
-RUN uv sync --frozen
+# Copiar archivos del proyecto
+COPY pyproject.toml .
+COPY main.py .
 
-# Copiar código
-COPY . .
+# Crear entorno con uv
+RUN uv sync
 
+# Comando por defecto -> usar uv para correr la app
 CMD ["uv", "run", "python", "main.py"]
