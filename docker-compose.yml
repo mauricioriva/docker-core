@@ -1,24 +1,26 @@
-version: '3.9'
+# Docker Compose para levantar la app NestJS y la app Flask en contenedores separados
 
 services:
+  # -------------------------------
+  # Servicio de la aplicación NestJS
+  # -------------------------------
   nestjs-app:
-    build: ./node-nestjs-app
-    container_name: nestjs-app
+    build: ./node-nestjs-app          # Ruta del Dockerfile de NestJS
+    container_name: nestjs-app        # Nombre del contenedor
     ports:
-      - "3000:3000"
+      - "3001:3000"                   # Mapea puerto 3001 en host -> 3000 en contenedor
     environment:
-      NODE_ENV: development
-    volumes:
-      - ./node-nestjs-app:/app
+      NODE_ENV: development           # Variable de entorno para NestJS
     depends_on:
-      - flask-app
+      - flask-app                      # Espera a que flask-app esté listo
 
+  # -------------------------------
+  # Servicio de la aplicación Flask
+  # -------------------------------
   flask-app:
-    build: ./python-flask-app
-    container_name: flask-app
+    build: ./python-flask-app         # Ruta del Dockerfile de Flask
+    container_name: flask-app         # Nombre del contenedor
     ports:
-      - "3001:3000"
+      - "3000:3000"                   # Mapea puerto 3000 en host -> 3000 en contenedor
     environment:
-      FLASK_ENV: development
-    volumes:
-      - ./python-flask-app:/app
+      FLASK_ENV: development          # Variable de entorno para Flask
