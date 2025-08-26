@@ -1,27 +1,27 @@
+
 # https://hub.docker.com/_/alpine
+FROM alpine
+
 FROM alpine:3.20
 
-# Instalar Node.js y npm
-RUN apk add --no-cache nodejs npm
+# Instalar Node.js + npm
+RUN apk add --no-cache nodejs npm \
+    && apk add --no-cache python3 make g++ git
 
 # Crear directorio de la app
 WORKDIR /app
 
-# Copiar package.json y package-lock.json primero (para aprovechar cache)
+# Copiar primero los manifests para instalar dependencias
 COPY package*.json ./
 
-# Instalar dependencias
-RUN npm install
+# Instalar dependencias (produce node_modules)
+RUN npm install --omit=dev
 
 # Copiar el resto del código
 COPY . .
 
-# Construir el proyecto (Nest usa TypeScript → compila a JS)
-RUN npm run build
-
-# Exponer el puerto (por defecto Nest usa 3000)
+# Exponer puerto (NestJS usa 3000 por default)
 EXPOSE 3000
 
-# Ejecutar el servidor (ejecuta el JS compilado)
-# Ejecutar el servidor (ejecuta el JS compilado)
+# Arrancar con npm run start
 CMD ["npm", "run", "start"]
