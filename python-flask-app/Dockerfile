@@ -1,21 +1,29 @@
-FROM alpine:3.20
+FROM alpine
 
-# Instalar Python y dependencias básicas
-RUN apk add --no-cache python3 py3-pip curl build-base
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
-# Instalar uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh -s -- --yes \
- && mv /root/.local/bin/uv /usr/local/bin/uv
+# Install Python and curl
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
+    curl
 
-# Directorio de la app
+# Download and install uv (static binary)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Add uv to PATH
+ENV PATH="/root/.local/bin:$PATH"
+
+# Set work directory
 WORKDIR /app
 
-# Copiar archivos del proyecto
-COPY pyproject.toml .
-COPY main.py .
+# Copy application files
+COPY . .
 
-# Crear entorno con uv
-RUN uv sync
+# Expose Flask port
+EXPOSE 3000
 
-# Comando por defecto -> usar uv para correr la app
-CMD ["uv", "run", "python", "main.py"]
+# Use uv to run the app
+CMD ["uv", "run", "main.py"]
