@@ -1,29 +1,45 @@
-FROM alpine
+# Imagen base mínima basada en Alpine Linux
+FROM alpine:latest
 
-# Set environment variables
+# -------------------------------
+# Variables de entorno para optimizar Python:
+# - PYTHONUNBUFFERED=1 -> Salida sin buffer (logs en tiempo real)
+# - PYTHONDONTWRITEBYTECODE=1 -> Evita generar archivos .pyc
+# -------------------------------
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
-# Install Python and curl
-RUN apk add --no-cache \
-    python3 \
-    py3-pip \
-    curl
+# -------------------------------
+# Instalar Python, pip y curl
+# -------------------------------
+RUN apk add --no-cache python3 py3-pip curl
 
-# Download and install uv (static binary)
+# -------------------------------
+# Instalar uv (binario estático para manejar entornos y dependencias)
+# -------------------------------
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Add uv to PATH
+# -------------------------------
+# Agregar uv al PATH (instalado en ~/.local/bin)
+# -------------------------------
 ENV PATH="/root/.local/bin:$PATH"
 
-# Set work directory
+# -------------------------------
+# Establecer directorio de trabajo
+# -------------------------------
 WORKDIR /app
 
-# Copy application files
+# -------------------------------
+# Copiar el código fuente de la aplicación
+# -------------------------------
 COPY . .
 
-# Expose Flask port
+# -------------------------------
+# Exponer el puerto usado por Flask (por defecto 3000 en este caso)
+# -------------------------------
 EXPOSE 3000
 
-# Use uv to run the app
+# -------------------------------
+# Comando por defecto: ejecutar la app usando uv
+# -------------------------------
 CMD ["uv", "run", "main.py"]
