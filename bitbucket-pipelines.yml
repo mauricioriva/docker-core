@@ -1,0 +1,63 @@
+image: docker:20.10.16
+
+options:
+  docker: true   # Enable Docker-in-Docker
+
+pipelines:
+  branches:
+    dev:
+      - step:
+          name: Build & Push (Dev)
+          services:
+            - docker
+          script:
+            - echo "Logging in to Docker Hub..."
+            - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            - echo "Building NestJS Image (dev)..."
+            - docker build -t $DOCKERHUB_USERNAME/nestjs-app:dev ./node-nestjs-app
+            - echo "Building Flask Image (dev)..."
+            - docker build -t $DOCKERHUB_USERNAME/flask-app:dev ./python-flask-app
+            - echo "Pushing images..."
+            - docker push $DOCKERHUB_USERNAME/nestjs-app:dev
+            - docker push $DOCKERHUB_USERNAME/flask-app:dev
+
+    staging:
+      - step:
+          name: Build & Push (Staging)
+          services:
+            - docker
+          script:
+            - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            - docker build -t $DOCKERHUB_USERNAME/nestjs-app:staging ./node-nestjs-app
+            - docker build -t $DOCKERHUB_USERNAME/flask-app:staging ./python-flask-app
+            - docker push $DOCKERHUB_USERNAME/nestjs-app:staging
+            - docker push $DOCKERHUB_USERNAME/flask-app:staging
+
+    prod:
+      - step:
+          name: Build & Push (Prod)
+          services:
+            - docker
+          script:
+            - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            - docker build -t $DOCKERHUB_USERNAME/nestjs-app:latest ./node-nestjs-app
+            - docker build -t $DOCKERHUB_USERNAME/flask-app:latest ./python-flask-app
+            - docker push $DOCKERHUB_USERNAME/nestjs-app:latest
+            - docker push $DOCKERHUB_USERNAME/flask-app:latest
+
+  pull-requests:
+    "**":
+      - step:
+          name: Build Only (PR)
+          services:
+            - docker
+          script:
+            - echo "Building NestJS Image for PR..."
+            - docker build -t nestjs-app:test ./node-nestjs-app
+            - echo "Building Flask Image for PR..."
+            - docker build -t flask-app:test ./python-flask-app
+
+definitions:
+  services:
+    docker:
+      memory: 3072  # Increase memory for Docker builds

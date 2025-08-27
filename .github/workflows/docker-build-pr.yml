@@ -1,0 +1,22 @@
+name: Build Docker Images (PR)
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - staging
+      - prod
+
+jobs:
+  build-only:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build NestJS Image
+        run: docker build -t nestjs-app:test ./node-nestjs-app
+
+      - name: Build Flask Image
+        run: docker build -t flask-app:test ./python-flask-app

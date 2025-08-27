@@ -1,0 +1,36 @@
+name: Build & Push Docker Images (Dev)
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    env:
+      NESTJS_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/nestjs-app
+      FLASK_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/flask-app
+      TAG: dev
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build NestJS Image
+        run: docker build -t $NESTJS_IMAGE:${TAG} ./node-nestjs-app
+
+      - name: Build Flask Image
+        run: docker build -t $FLASK_IMAGE:${TAG} ./python-flask-app
+
+      - name: Push Images
+        run: |
+          docker push $NESTJS_IMAGE:${TAG}
+          docker push $FLASK_IMAGE:${TAG}
