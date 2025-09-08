@@ -1,0 +1,7 @@
+helm install hello hello-world-chart/
+
+helm upgrade hello hello-world-chart/
+
+kubectl port-forward svc/hello-world 8080:80
+
+https://helm.sh/docs/
